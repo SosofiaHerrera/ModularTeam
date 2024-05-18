@@ -43,9 +43,11 @@ class database:
         self.data = (correo, contraseña)
         self.cursor.execute(self.sql, self.data)
         self.result = self.cursor.fetchall()
+        usuario = self.result  # Asignar los resultados a la lista usuario
         self.conn.commit()
         self.close()
         return usuario
+
 
     def get_ids_usuarios(self):
         self.open()
@@ -74,6 +76,51 @@ class database:
         self.cursor.execute(self.sql, self.data)
         self.conn.commit()
         self.close()
+    
+    def actualizar_usuario(self, usuario_id, nuevo_correo, nueva_contraseña, nuevo_nombre, nueva_carrera, nuevo_centro):
+        self.open()
+        query = "UPDATE usuarios SET correo=%s, contraseña=%s, nombre=%s, carrera=%s, centro=%s WHERE id=%s"
+        data = (nuevo_correo, nueva_contraseña, nuevo_nombre, nueva_carrera, nuevo_centro, usuario_id)
+        self.cursor.execute(query, data)
+        self.conn.commit()
+        self.close()
+
+    def insertarCurriculum(self, curriculum):
+        self.open()
+        self.sql = "INSERT INTO curriculum (id, idusuarios, descripcion, experiencia, intereses, habilidades) VALUES (%s,%s,%s,%s,%s,%s)"
+        self.data = (
+            curriculum.getid(),
+            curriculum.getidusuarios(),
+            curriculum.getdescripcion(),
+            curriculum.getexperiencia(),
+            curriculum.getintereses(),
+            curriculum.gethabilidades()
+        )
+        self.cursor.execute(self.sql, self.data)
+        self.conn.commit()
+        self.close()
+    
+    def obtener_nombre_usuario_por_id(self, usuario_id):
+        self.open()
+        self.sql = "SELECT nombre FROM usuarios WHERE id=%s"
+        self.data = (usuario_id,)
+        self.cursor.execute(self.sql, self.data)
+        result = self.cursor.fetchone()
+        self.close()
+        return result[0] if result else None
+    
+    def get_ids_curriculums(self):
+        self.open()
+        idCurriculum = []
+        self.sql = "SELECT id FROM curriculum"
+        self.cursor.execute(self.sql)
+        self.result = self.cursor.fetchall()
+        for x in self.result:
+            idCurriculum.append(int(x[0]))
+        idCurriculum.sort()
+        self.conn.commit()
+        self.close()
+        return idCurriculum
 
 
 class usuarios:
@@ -97,3 +144,26 @@ class usuarios:
         return self.carrera
     def getcentro(self):
         return self.centro 
+    
+class curriculum:
+    def __init__(self, id, idusuarios, descripcion, experiencia, intereses, habilidades):
+        self.id = id
+        self.idusuarios = idusuarios
+        self.descripcion = descripcion
+        self.experiencia = intereses
+        self.intereses = intereses
+        self.habilidades = habilidades
+
+    def getid(self):
+        return self.id
+    def getidusuarios(self):
+        return self.idusuarios
+    def getdescripcion(self):
+        return self.descripcion
+    def getexperiencia(self):
+        return self.experiencia
+    def getintereses(self):
+        return self.intereses
+    def gethabilidades(self):
+        return self.habilidades 
+    
