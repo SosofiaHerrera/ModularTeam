@@ -156,42 +156,47 @@ def actualizar_usuario():
     CTkMessagebox.CTkMessagebox(message="Los datos del usuario han sido actualizados exitosamente", title="Actualización exitosa", icon="info")
 
 def crearCurriculum():
-    # Obtener el ID del nuevo curriculum
-    idCurriculum = mydb.get_ids_curriculums()
-    ID = len(idCurriculum) + 1
-    idUsuarios = mydb.id
-    
+    # Paso 1: Obtener datos de los widgets de entrada
     descripcion = descripcionLogin.get()
     experiencia = experienciaLogin.get()
     intereses = interesesLogin.get()
     habilidades = habilidadesLogin.get()
 
-    # Crear un nuevo usuario con los datos obtenidos
-    curriculum = [ID, idUsuarios, descripcion, experiencia, intereses, habilidades]
+    # Paso 2: Verificar si los campos están completos
+    for field in [descripcion, experiencia, intereses, habilidades]:
+        if not field:
+            CTkMessagebox.CTkMessagebox(message="Por favor, completa todos los campos", title="Campos incompletos", icon="warning")
+            return
 
-    # Verificar si todos los campos del formulario están completos
-    for n in curriculum:
-        if n == "":
-            CTkMessagebox.CTkMessagebox(message="Los campos no están completos", title="Llenar todos los campos", icon="cancel")
-            unlock_all()
-            delete_all()
-            txNombreLogin.wait_variable(var)
-            return  # Salir de la función si falta algún campo
+    # Paso 3: Verificar si el currículum ya existe
+    curriculumExiste = mydb.obtener_curriculum(mydb.id)
+    if curriculumExiste:
+        # El currículum ya existe, actualizarlo
+        mydb.actualizarCurriculum(mydb.id, descripcion, experiencia, intereses, habilidades)
+        CTkMessagebox.CTkMessagebox(message="El currículum ha sido actualizado exitosamente", title="Actualización exitosa", icon="info")
+    else:
+        # El currículum no existe, insertar uno nuevo
+        mydb.insertarCurriculum(curriculum(mydb.get_ids_curriculums()[-1]+1, mydb.id, descripcion, experiencia, intereses, habilidades))
+        CTkMessagebox.CTkMessagebox(message="El currículum ha sido creado exitosamente", title="Creación exitosa", icon="info")
 
-    # Crear el objeto de curriculum nuevo
-    curriculumNuevo = curriculum(ID, idUsuarios, descripcion, experiencia, intereses, habilidades)
+    # Paso 4: Limpiar campos y restablecer la interfaz
+    delete_all()
+    perfil()
 
-    # Insertar el nuevo curriculum en la base de datos
-    mydb.insertarCurriculum(curriculumNuevo)
+def agregarProyectoDB():
+    nombre = nombreProyectoLogin.get()
+    descripcion = descripcionLogin.get()
+    objetivo = objetivoLogin.get()
+    area = areaLogin.get()
 
-    # Mostrar un mensaje de éxito y volver a la pantalla de inicio de sesión
-    CTkMessagebox.CTkMessagebox(message="El currículum ha sido creado exitosamente", title="Creación exitosa", icon="info")
+    proyectoNuevo = proyecto(None, nombre, descripcion, objetivo, area)  # El ID se asigna automáticamente en la base de datos
+    mydb.insertar_proyecto(proyectoNuevo)
     unlock_all()
     delete_all()
     forget_all()
     perfil()
 
-   
+ 
 
 #--------------------------------INTERFAZ CREAR CUENTA--------------------------#
 registroImagen = interfaz.CTkImage(light_image=Image.open("01login.png"), size=(700, 750))
@@ -234,20 +239,33 @@ proyectoButton = interfaz.CTkButton(app, text="Proyecto", width=200, height=150,
 textoCurriculum = interfaz.CTkLabel(app, text="CURRICULUM", font=("Yu gothic medium", 30))
 
 nombreLabel = interfaz.CTkLabel(app, text="Nombre", font=("Yu gothic medium", 20))
-nombreLogin = interfaz.CTkEntry(app, width=300)
+nombreLogin = interfaz.CTkEntry(app, width=800)
 descripcionLabel = interfaz.CTkLabel(app, text="Descripción", font=("Yu gothic medium", 20))
-descripcionLogin = interfaz.CTkEntry(app, width=300)
+descripcionLogin = interfaz.CTkEntry(app, width=800, height=50)
 experienciaLabel = interfaz.CTkLabel(app, text="Experiencia", font=("Yu gothic medium", 20))
-experienciaLogin = interfaz.CTkEntry(app, width=300)
+experienciaLogin = interfaz.CTkEntry(app, width=800, height=50)
 interesesLabel = interfaz.CTkLabel(app, text="Intereses", font=("Yu gothic medium", 20))
-interesesLogin = interfaz.CTkEntry(app, width=300)
+interesesLogin = interfaz.CTkEntry(app, width=800, height=50)
 habilidadesLabel = interfaz.CTkLabel(app, text="Habilidades", font=("Yu gothic medium", 20))
-habilidadesLogin = interfaz.CTkEntry(app, width=300)
-guardarButton = interfaz.CTkButton(app, text="Guardar", command=crearCurriculum, width=430, font=("Yu gothic medium", 12), corner_radius=10, hover_color="#052C3F", fg_color="#001520")
+habilidadesLogin = interfaz.CTkEntry(app, width=800, height=50)
+guardarButton = interfaz.CTkButton(app, text="Guardar", command=crearCurriculum, width=950, font=("Yu gothic medium", 12), corner_radius=10, hover_color="#052C3F", fg_color="#001520")
 
 
 #--------------------------------INTERFAZ PROYECTO --------------------------#
-textoProyecto = interfaz.CTkLabel(app, text="PROYECTO", font=("Yu gothic medium", 30))
+textoProyecto = interfaz.CTkLabel(app, text="PROYECTO", font=("Yu gothic medium", 45))
+
+#--------------------------------INTERFAZ AÑADIR PROYECTO --------------------------#
+nombreProyectoLabel = interfaz.CTkLabel(app, text="Nombre", font=("Yu gothic medium", 20))
+nombreProyectoLogin = interfaz.CTkEntry(app, width=800)
+descripcionLabel = interfaz.CTkLabel(app, text="Descripción", font=("Yu gothic medium", 20))
+descripcionLogin = interfaz.CTkEntry(app, width=800, height=50)
+objetivoLabel = interfaz.CTkLabel(app, text="Objetivo", font=("Yu gothic medium", 20))
+objetivoLogin = interfaz.CTkEntry(app, width=800, height=50)
+areaLabel = interfaz.CTkLabel(app, text="Área", font=("Yu gothic medium", 20))
+areaLogin = interfaz.CTkEntry(app, width=800, height=50)
+guardarProyectoButton = interfaz.CTkButton(app, text="Guardar", command=agregarProyectoDB, width=950, font=("Yu gothic medium", 12), corner_radius=10, hover_color="#052C3F", fg_color="#001520")
+
+
 
 #--------------------------------INTERFAZ BUSCAR PROYECTO --------------------------#
 textoProyectos = interfaz.CTkLabel(app, text="BUSCAR PROYECTOS", font=("Yu gothic medium", 30))
@@ -257,12 +275,10 @@ textoProyectos = interfaz.CTkLabel(app, text="BUSCAR PROYECTOS", font=("Yu gothi
 menu = CTkMenuBar(app)
 def place_menu():
     menu.add_cascade("Perfil", command=perfil)
-    menu.add_cascade("Curriculum")
-    menu.add_cascade("Mi proyecto")
+    menu.add_cascade("Proyecto", command=proyectoView)
     menu.add_cascade("Buscar proyectos", command=perfil)
     menu.add_cascade("Salir", command=app.quit)
     
-
 def place_login():
     forget_all()
     loginLabel.pack(anchor=tkinter.W)
@@ -316,40 +332,91 @@ def perfil():
     canvas2.create_line(0, 0, 900, 0, fill="white")  # Aquí dibujamos la línea desde (0, 0) hasta (300, 0)
     canvas2.place(x=150, y=750, anchor=tkinter.W)
     
-    curriculumButton = interfaz.CTkButton(app, text="Curriculum", command=curriculum, width=200, height=150, font=("Yu gothic medium", 25), corner_radius=10, hover_color="#000000", fg_color="#262626")
+    curriculumButton = interfaz.CTkButton(app, text="Curriculum", command=place_curriculum, width=200, height=150, font=("Yu gothic medium", 25), corner_radius=10, hover_color="#000000", fg_color="#262626")
     curriculumButton.place(x=1100, y=300, anchor=tkinter.CENTER)
     proyectoButton.place(x=1100, y=500, anchor=tkinter.CENTER)
     
-def curriculum():
+def place_curriculum():
     forget_all()
-    textoCurriculum.place(x=200, y=150, anchor=tkinter.CENTER)
+    textoCurriculum.place(x=200, y=130, anchor=tkinter.CENTER)
+    canvas = Canvas(app, width=1200, height=2, bg="#1c1c1c", highlightthickness=0)  
+    canvas.create_line(0, 0, 1200, 0, fill="white")  
+    canvas.place(x=120, y=230, anchor=tkinter.W)
+    
+    # Obtener los datos del usuario desde el currículum en la base de datos
+    curriculum = mydb.obtener_curriculum(mydb.id)
+    
+    if curriculum:
+        # Si hay un currículum para el usuario, asumimos que es el primer elemento de la lista
+        primer_curriculum = curriculum[0]
+        descripcion_usuario = primer_curriculum[2]  # Accedemos al tercer elemento de la tupla para la descripción
+        experiencia_usuario = primer_curriculum[3]  # Accedemos al cuarto elemento de la tupla para la experiencia
+        intereses_usuario = primer_curriculum[4]  # Accedemos al quinto elemento de la tupla para los intereses
+        habilidades_usuario = primer_curriculum[5]  # Accedemos al sexto elemento de la tupla para las habilidades
+    else:
+        descripcion_usuario = ""
+        experiencia_usuario = ""
+        intereses_usuario = ""
+        habilidades_usuario = ""
+    
+    # Colocar los datos en los campos correspondientes
+    nombreLabel.place(x=100, y=230)
+    nombreLogin.place(x=250, y=230)
+    nombreLogin.insert(tkinter.END, mydb.nombre)
+    nombreLogin.configure(state='disabled')  # Hacer el campo no editable
+    
+    descripcionLabel.place(x=100, y=280)
+    descripcionLogin.place(x=250, y=280)
+    descripcionLogin.insert(tkinter.END, descripcion_usuario)
+    experienciaLabel.place(x=100, y=350)
+    experienciaLogin.place(x=250, y=350)
+    experienciaLogin.insert(tkinter.END, experiencia_usuario)
+    interesesLabel.place(x=100, y=420)
+    interesesLogin.place(x=250, y=420)
+    interesesLogin.insert(tkinter.END, intereses_usuario)
+    habilidadesLabel.place(x=100, y=490)
+    habilidadesLogin.place(x=250, y=490)
+    habilidadesLogin.insert(tkinter.END, habilidades_usuario)
+    
+    guardarButton.place(x=580, y=600, anchor=tkinter.CENTER)
+    
+    canvas2 = Canvas(app, width=1200, height=2, bg="#1c1c1c", highlightthickness=0)  
+    canvas2.create_line(0, 0, 1200, 0, fill="white")  
+    canvas2.place(x=120, y=800, anchor=tkinter.W)
+
+def proyectoView():
+    forget_all()
+    textoProyecto.place(x=250, y=150, anchor=tkinter.CENTER)
+    agregarProyectoButton = interfaz.CTkButton(app, text="Añadir proyecto", command=agregarProyecto, width=200, font=("Yu gothic medium", 12), corner_radius=10, hover_color="#000000", fg_color="#262626")
+    agregarProyectoButton.place(x=230, y=200, anchor=tkinter.CENTER)
+
     canvas = Canvas(app, width=900, height=2, bg="#1c1c1c", highlightthickness=0)  # Asegúrate de que el canvas tenga un fondo que coincida con la interfaz
     canvas.create_line(0, 0, 900, 0, fill="white")  # Aquí dibujamos la línea desde (0, 0) hasta (300, 0)
-    canvas.place(x=150, y=250, anchor=tkinter.W)
+    canvas.place(x=160, y=300, anchor=tkinter.W)
     
-    nombre_usuario = mydb.nombre
-    nombreLabel.place(x=130, y=250)
-    nombreLogin.place(x=250, y=250)
-    nombreLogin.insert(tkinter.END, nombre_usuario)
-    descripcionLabel.place(x=130, y=300)
-    descripcionLogin.place(x=250, y=300)
-    experienciaLabel.place(x=130, y=350)
-    experienciaLogin.place(x=250, y=350)
-    interesesLabel.place(x=130, y=400)
-    interesesLogin.place(x=250, y=400)
-    habilidadesLabel.place(x=130, y=450)
-    habilidadesLogin.place(x=250, y=450)
-    guardarButton.place(x=340, y=530, anchor=tkinter.CENTER)
-    
-    canvas2 = Canvas(app, width=900, height=2, bg="#1c1c1c", highlightthickness=0)  # Asegúrate de que el canvas tenga un fondo que coincida con la interfaz
-    canvas2.create_line(0, 0, 900, 0, fill="white")  # Aquí dibujamos la línea desde (0, 0) hasta (300, 0)
-    canvas2.place(x=150, y=750, anchor=tkinter.W)    
-    
-    
-def proyecto():
+def agregarProyecto():
     forget_all()
-    textoProyecto.place(x=1050, y=300, anchor=tkinter.CENTER)
+    textoProyecto.place(x=200, y=130, anchor=tkinter.CENTER)
+    canvas = Canvas(app, width=1200, height=2, bg="#1c1c1c", highlightthickness=0)  
+    canvas.create_line(0, 0, 1200, 0, fill="white")  
+    canvas.place(x=120, y=230, anchor=tkinter.W)
     
+    nombreLabel.place(x=100, y=230)
+    nombreLogin.place(x=250, y=230)
+    
+    descripcionLabel.place(x=100, y=280)
+    descripcionLogin.place(x=250, y=280)
+    objetivoLabel.place(x=100, y=350)
+    objetivoLogin.place(x=250, y=350)
+    areaLabel.place(x=100, y=420)
+    areaLogin.place(x=250, y=420)
+    
+    guardarProyectoButton.place(x=580, y=500, anchor=tkinter.CENTER)
+    
+    canvas2 = Canvas(app, width=1200, height=2, bg="#1c1c1c", highlightthickness=0)  
+    canvas2.create_line(0, 0, 1200, 0, fill="white")  
+    canvas2.place(x=120, y=600, anchor=tkinter.W)
+
 def buscarProyecto():
     forget_all()
     textoProyectos.place(x=1050, y=300, anchor=tkinter.CENTER)

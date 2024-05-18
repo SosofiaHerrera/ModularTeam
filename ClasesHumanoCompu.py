@@ -99,6 +99,25 @@ class database:
         self.cursor.execute(self.sql, self.data)
         self.conn.commit()
         self.close()
+        
+    def actualizarCurriculum(self, idUsuario, nuevo_descripcion, nuevo_experiencia, nuevo_intereses, nuevo_habilidades):
+        self.open()
+        query = "UPDATE curriculum SET descripcion=%s, experiencia=%s, intereses=%s, habilidades=%s WHERE idusuarios=%s"
+        data = (nuevo_descripcion, nuevo_experiencia, nuevo_intereses, nuevo_habilidades, idUsuario)
+        self.cursor.execute(query, data)
+        self.conn.commit()        
+        self.close()
+
+        
+    def obtener_curriculum(self, idUsuarios):
+        self.open()
+        self.sql = "SELECT * FROM curriculum WHERE idusuarios = %s"
+        self.data = (idUsuarios,)
+        self.cursor.execute(self.sql, self.data)
+        self.result = self.cursor.fetchall()
+        self.conn.commit()
+        self.close()
+        return self.result
     
     def obtener_nombre_usuario_por_id(self, usuario_id):
         self.open()
@@ -121,6 +140,33 @@ class database:
         self.conn.commit()
         self.close()
         return idCurriculum
+    
+    def insertar_proyecto(self, proyecto):
+        self.open()
+        self.sql = "INSERT INTO proyecto (nombre, descripcion, objetivo, area) VALUES (%s,%s,%s,%s)"
+        self.data = (
+            proyecto.getnombre(),
+            proyecto.getdescripcion(),
+            proyecto.getobjetivo(),
+            proyecto.getarea(),
+        )
+        self.cursor.execute(self.sql, self.data)
+        self.conn.commit()
+        self.close()
+
+        
+    def get_ids_proyectos(self):
+        self.open()
+        idProyecto = []
+        self.sql = "SELECT id FROM proyecto"
+        self.cursor.execute(self.sql)
+        self.result = self.cursor.fetchall()
+        for x in self.result:
+            idProyecto.append(int(x[0]))
+        idProyecto.sort()
+        self.conn.commit()
+        self.close()
+        return idProyecto
 
 
 class usuarios:
@@ -150,7 +196,7 @@ class curriculum:
         self.id = id
         self.idusuarios = idusuarios
         self.descripcion = descripcion
-        self.experiencia = intereses
+        self.experiencia = experiencia  # Corregido el nombre de la variable
         self.intereses = intereses
         self.habilidades = habilidades
 
@@ -166,4 +212,22 @@ class curriculum:
         return self.intereses
     def gethabilidades(self):
         return self.habilidades 
-    
+
+class proyecto:
+    def __init__(self, id, nombre, descripcion, objetivo, area):
+        self.id = id
+        self.nombre = nombre
+        self.descripcion = descripcion
+        self.objetivo = objetivo  # Corregido el nombre de la variable
+        self.area = area
+
+    def getid(self):
+        return self.id
+    def getnombre(self):
+        return self.nombre
+    def getdescripcion(self):
+        return self.descripcion
+    def getobjetivo(self):
+        return self.objetivo
+    def getarea(self):
+        return self.area
