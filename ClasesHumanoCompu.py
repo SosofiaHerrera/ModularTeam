@@ -143,8 +143,9 @@ class database:
     
     def insertar_proyecto(self, proyecto):
         self.open()
-        self.sql = "INSERT INTO proyecto (nombre, descripcion, objetivo, area) VALUES (%s,%s,%s,%s)"
+        self.sql = "INSERT INTO proyecto (id, nombre, descripcion, objetivo, area) VALUES (%s, %s, %s, %s, %s)"
         self.data = (
+            proyecto.getid(),
             proyecto.getnombre(),
             proyecto.getdescripcion(),
             proyecto.getobjetivo(),
@@ -167,6 +168,24 @@ class database:
         self.conn.commit()
         self.close()
         return idProyecto
+    
+    def buscar_proyectos(self, nombre):
+        self.open()
+        self.cursor.execute("SELECT * FROM proyecto WHERE nombre LIKE %s", (f"%{nombre}%",))
+        proyectos = self.cursor.fetchall()
+        self.conn.commit()
+        self.close()
+        return proyectos
+    
+    def obtener_curriculum(self, idUsuarios):
+        self.open()
+        self.sql = "SELECT * FROM curriculum WHERE idusuarios = %s"
+        self.data = (idUsuarios,)
+        self.cursor.execute(self.sql, self.data)
+        self.result = self.cursor.fetchall()
+        self.conn.commit()
+        self.close()
+        return self.result
 
 
 class usuarios:

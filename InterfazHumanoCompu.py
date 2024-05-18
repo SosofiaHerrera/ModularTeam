@@ -188,15 +188,31 @@ def agregarProyectoDB():
     descripcion = descripcionLogin.get()
     objetivo = objetivoLogin.get()
     area = areaLogin.get()
-
-    proyectoNuevo = proyecto(None, nombre, descripcion, objetivo, area)  # El ID se asigna automáticamente en la base de datos
+    
+    idProyectos = mydb.get_ids_proyectos()
+    ID = len(idProyectos) + 1
+    for id in range(len(idProyectos)):
+        if id + 1 == idProyectos[id]:
+            continue
+        else:
+            ID = id + 1
+            break
+        
+    proyectoNuevo = proyecto(ID, nombre, descripcion, objetivo, area)  # El ID se asigna automáticamente en la base de datos
     mydb.insertar_proyecto(proyectoNuevo)
     unlock_all()
     delete_all()
     forget_all()
-    perfil()
+    proyectoView()
 
- 
+def buscarProyectoDB():
+    nombre = buscadorEntry.get()
+    proyectoEncontrado = mydb.buscar_proyectos(nombre)
+    if proyectoEncontrado:
+        buscarProyecto()
+    else:
+        CTkMessagebox.CTkMessagebox(message="No se encontraron proyectos con ese término de búsqueda.", title="No hay", icon="warning")
+
 
 #--------------------------------INTERFAZ CREAR CUENTA--------------------------#
 registroImagen = interfaz.CTkImage(light_image=Image.open("01login.png"), size=(700, 750))
@@ -269,6 +285,8 @@ guardarProyectoButton = interfaz.CTkButton(app, text="Guardar", command=agregarP
 
 #--------------------------------INTERFAZ BUSCAR PROYECTO --------------------------#
 textoProyectos = interfaz.CTkLabel(app, text="BUSCAR PROYECTOS", font=("Yu gothic medium", 30))
+buscadorlabel = interfaz.CTkLabel(app, text="Buscar proyecto:", font=("Yu gothic medium", 12))
+buscadorEntry = interfaz.CTkEntry(app, width=200, font=("Yu gothic medium", 12))
 
 
 #-------------------------------------INTERFAZ PROYECTO------------------------------#
@@ -388,12 +406,16 @@ def proyectoView():
     forget_all()
     textoProyecto.place(x=250, y=150, anchor=tkinter.CENTER)
     agregarProyectoButton = interfaz.CTkButton(app, text="Añadir proyecto", command=agregarProyecto, width=200, font=("Yu gothic medium", 12), corner_radius=10, hover_color="#000000", fg_color="#262626")
-    agregarProyectoButton.place(x=230, y=200, anchor=tkinter.CENTER)
-
-    canvas = Canvas(app, width=900, height=2, bg="#1c1c1c", highlightthickness=0)  # Asegúrate de que el canvas tenga un fondo que coincida con la interfaz
-    canvas.create_line(0, 0, 900, 0, fill="white")  # Aquí dibujamos la línea desde (0, 0) hasta (300, 0)
-    canvas.place(x=160, y=300, anchor=tkinter.W)
+    agregarProyectoButton.place(x=230, y=200, anchor=tkinter.CENTER)    
+    buscadorlabel.place(x=800, y=200, anchor=tkinter.CENTER)
+    buscadorEntry.place(x=1000, y=200, anchor=tkinter.CENTER)
+    buscarButton = interfaz.CTkButton(app, text="Buscar", command=buscarProyectoDB, width=150, font=("Yu gothic medium", 12), corner_radius=10, hover_color="#000000", fg_color="#262626")
+    buscarButton.place(x=1200, y=200, anchor=tkinter.CENTER)
     
+    canvas = Canvas(app, width=1450, height=2, bg="#1c1c1c", highlightthickness=0)  # Asegúrate de que el canvas tenga un fondo que coincida con la interfaz
+    canvas.create_line(0, 0, 1450, 0, fill="white")  # Aquí dibujamos la línea desde (0, 0) hasta (300, 0)
+    canvas.place(x=160, y=300, anchor=tkinter.W)
+
 def agregarProyecto():
     forget_all()
     textoProyecto.place(x=200, y=130, anchor=tkinter.CENTER)
@@ -419,7 +441,20 @@ def agregarProyecto():
 
 def buscarProyecto():
     forget_all()
-    textoProyectos.place(x=1050, y=300, anchor=tkinter.CENTER)
+    textoProyecto.place(x=200, y=130, anchor=tkinter.CENTER)
+    canvas = Canvas(app, width=1200, height=2, bg="#1c1c1c", highlightthickness=0)  
+    canvas.create_line(0, 0, 1200, 0, fill="white")  
+    canvas.place(x=120, y=230, anchor=tkinter.W)
+    
+    nombreLabel.place(x=100, y=230)
+    nombreLogin.place(x=250, y=230)
+    
+    descripcionLabel.place(x=100, y=280)
+    descripcionLogin.place(x=250, y=280)
+    objetivoLabel.place(x=100, y=350)
+    objetivoLogin.place(x=250, y=350)
+    areaLabel.place(x=100, y=420)
+    areaLogin.place(x=250, y=420)
 
 place_login()
 app.mainloop()
